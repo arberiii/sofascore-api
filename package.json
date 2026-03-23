@@ -1,17 +1,20 @@
 {
   "name": "sofascore-api",
   "version": "1.0.0",
-  "description": "SofaScore unofficial API wrapper with Swagger UI",
+  "description": "SofaScore unofficial API wrapper with Swagger UI and MCP server",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "mcp": "node mcp/index.mjs"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.10.1",
     "axios": "^1.7.2",
     "express": "^4.19.2",
     "swagger-ui-express": "^5.0.1",
-    "yaml": "^2.4.5"
+    "yaml": "^2.4.5",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "nodemon": "^3.1.4"

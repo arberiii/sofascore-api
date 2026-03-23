@@ -1,6 +1,6 @@
 # SofaScore API
 
-An unofficial SofaScore API proxy with interactive Swagger UI documentation. All requests are proxied to `https://www.sofascore.com/api/v1` with proper browser headers, giving you a local REST interface and a live "Try it out" explorer.
+An unofficial SofaScore API proxy with interactive Swagger UI documentation **and an MCP server** for use with AI assistants (Claude, Cursor, etc.). All requests are proxied to `https://www.sofascore.com/api/v1` with proper browser headers, giving you a local REST interface, a live "Try it out" explorer, and 26 MCP tools.
 
 > **Disclaimer:** This is not affiliated with or endorsed by SofaScore. Use of this project is subject to [SofaScore's Terms of Service](https://www.sofascore.com/news/terms-of-service). Do not use it for commercial purposes or in ways that violate their ToS. Be mindful of request frequency — aggressive polling may get your IP rate-limited.
 
@@ -10,6 +10,7 @@ An unofficial SofaScore API proxy with interactive Swagger UI documentation. All
 
 - Full **OpenAPI 3.0** specification covering 22 endpoints
 - Interactive **Swagger UI** at `/docs` — try every endpoint from your browser
+- **MCP server** with 26 tools — plug directly into Claude, Cursor, or any MCP-compatible AI assistant
 - **Proxy server** with browser-like headers to avoid 403s
 - Covers **Sports, Tournaments, Events/Matches, Players, Teams, and Search**
 - Graceful error handling with descriptive JSON error responses
@@ -42,6 +43,9 @@ PORT=3001 npm start
 
 # Development mode with auto-reload
 npm run dev
+
+# Start the MCP server (stdio)
+npm run mcp
 ```
 
 Once running, open:
@@ -62,10 +66,107 @@ sofascore-api/
 ├── src/
 │   ├── index.js       # Express server, proxy handler, Swagger UI mount
 │   └── openapi.js     # Full OpenAPI 3.0 specification
+├── mcp/
+│   └── index.mjs      # MCP server with 26 tools (stdio transport)
 ├── package.json
 ├── .gitignore
 └── README.md
 ```
+
+---
+
+## MCP Server
+
+The MCP (Model Context Protocol) server exposes all SofaScore endpoints as **tools** that AI assistants can call directly. It uses stdio transport — no HTTP port needed.
+
+### Running the MCP server
+
+```bash
+npm run mcp
+```
+
+Or invoke directly:
+
+```bash
+node mcp/index.mjs
+```
+
+### Connecting to Claude Desktop
+
+Add this to your `claude_desktop_config.json` (macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "sofascore": {
+      "command": "node",
+      "args": ["/absolute/path/to/sofascore-api/mcp/index.mjs"]
+    }
+  }
+}
+```
+
+### Connecting to Claude Code (CLI)
+
+```bash
+claude mcp add sofascore node /absolute/path/to/sofascore-api/mcp/index.mjs
+```
+
+### Connecting to Cursor
+
+Add to your Cursor MCP config (`~/.cursor/mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "sofascore": {
+      "command": "node",
+      "args": ["/absolute/path/to/sofascore-api/mcp/index.mjs"]
+    }
+  }
+}
+```
+
+### Available MCP Tools
+
+| Tool | Description |
+|------|-------------|
+| `get_live_events` | All currently live matches for a sport |
+| `get_scheduled_events` | All matches on a given date |
+| `get_sport_categories` | Categories/regions for a sport |
+| `get_unique_tournaments` | All tournaments for a sport |
+| `get_tournament` | Tournament details by ID |
+| `get_tournament_seasons` | Available seasons for a tournament |
+| `get_standings` | League table for a tournament season |
+| `get_tournament_statistics` | Player stats for a season (sortable, filterable) |
+| `get_event` | Match details (score, status, teams, venue) |
+| `get_event_lineups` | Starting XIs, formations, player ratings |
+| `get_event_shotmap` | Shot map with coordinates and xG |
+| `get_event_graph` | Match momentum graph over time |
+| `get_event_statistics` | Possession, xG, shots, passes, corners, etc. |
+| `get_event_average_positions` | Average player positions on the pitch |
+| `get_event_player_heatmap` | Player touch heatmap for a match |
+| `get_event_player_rating_breakdown` | Player rating breakdown for a match |
+| `get_player` | Player profile (name, position, team, nationality) |
+| `get_player_statistics_seasons` | All seasons a player has stats for |
+| `get_player_season_statistics` | Player stats for a specific tournament season |
+| `get_player_season_heatmap` | Player touch heatmap across a full season |
+| `get_player_last_events` | Player's recent matches (paginated) |
+| `get_team` | Team details (name, country, manager, stadium) |
+| `get_team_players` | Full squad list |
+| `get_team_last_events` | Team's recent results (paginated) |
+| `get_team_next_events` | Team's upcoming fixtures (paginated) |
+| `search` | Search for players, teams, and tournaments by name |
+
+### Example prompts once connected
+
+Once the MCP server is connected to your AI assistant, you can ask things like:
+
+- *"What football matches are live right now?"*
+- *"Show me the Premier League standings"*
+- *"Get the lineups and shot map for the Brighton vs Liverpool match"*
+- *"What are West Ham's next 5 fixtures?"*
+- *"Find the squad for team ID 37"*
 
 ---
 
