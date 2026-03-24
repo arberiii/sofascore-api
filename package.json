@@ -6,7 +6,12 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "mcp": "node mcp/index.mjs"
+    "mcp": "node mcp/index.mjs",
+    "backtest:home": "node scripts/backtest-home.js",
+    "backtest:away": "SIDE=away node scripts/backtest-home.js",
+    "backtest:best": "node scripts/find-best-strategy.js",
+    "season:analysis": "node scripts/season-analysis.js",
+    "season:bankroll": "node scripts/season-bankroll.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.10.1",
