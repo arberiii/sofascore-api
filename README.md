@@ -1,8 +1,8 @@
-# SofaScore API
+# Sports Edge
 
-An unofficial SofaScore API proxy with interactive Swagger UI documentation **and an MCP server** for use with AI assistants (Claude, Cursor, etc.). All requests are proxied to `https://www.sofascore.com/api/v1` with proper browser headers, giving you a local REST interface, a live "Try it out" explorer, and 26 MCP tools.
+An unofficial sports data platform combining a **SofaScore API proxy**, **MCP server** for AI assistants, and **analytics scripts** for football betting analysis and NBA odds/Polymarket comparison. All SofaScore requests are proxied with proper browser headers, giving you a local REST interface, a live Swagger UI, 26 MCP tools, and a suite of data-driven betting scripts.
 
-> **Disclaimer:** This is not affiliated with or endorsed by SofaScore. Use of this project is subject to [SofaScore's Terms of Service](https://www.sofascore.com/news/terms-of-service). Do not use it for commercial purposes or in ways that violate their ToS. Be mindful of request frequency — aggressive polling may get your IP rate-limited.
+> **Disclaimer:** This is not affiliated with or endorsed by SofaScore, ESPN, DraftKings, or Polymarket. Use of this project is subject to [SofaScore's Terms of Service](https://www.sofascore.com/news/terms-of-service). Do not use it for commercial purposes or in ways that violate their ToS. Be mindful of request frequency — aggressive polling may get your IP rate-limited.
 
 ---
 
@@ -13,7 +13,8 @@ An unofficial SofaScore API proxy with interactive Swagger UI documentation **an
 - **MCP server** with 26 tools — plug directly into Claude, Cursor, or any MCP-compatible AI assistant
 - **Proxy server** with browser-like headers to avoid 403s
 - Covers **Sports, Tournaments, Events/Matches, Players, Teams, and Search**
-- Graceful error handling with descriptive JSON error responses
+- **Football betting scripts** — home/away bias backtesting, strategy finder, bankroll simulation
+- **NBA pipeline** — today's odds (ESPN/DraftKings), backtesting, and Polymarket implied probability comparison
 - Zero config — runs with a single command
 
 ---
@@ -29,8 +30,8 @@ An unofficial SofaScore API proxy with interactive Swagger UI documentation **an
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-username/sofascore-api.git
-cd sofascore-api
+git clone https://github.com/your-username/sports-edge.git
+cd sports-edge
 
 # Install dependencies
 npm install
@@ -62,15 +63,65 @@ Once running, open:
 ## Project Structure
 
 ```
-sofascore-api/
+sports-edge/
 ├── src/
-│   ├── index.js       # Express server, proxy handler, Swagger UI mount
-│   └── openapi.js     # Full OpenAPI 3.0 specification
+│   ├── index.js              # Express server, proxy handler, Swagger UI mount
+│   └── openapi.js            # Full OpenAPI 3.0 specification
 ├── mcp/
-│   └── index.mjs      # MCP server with 26 tools (stdio transport)
+│   └── index.mjs             # MCP server with 26 tools (stdio transport)
+├── scripts/
+│   ├── backtest-home.js      # Football home/away bias backtesting
+│   ├── find-best-strategy.js # Find optimal betting strategy across parameters
+│   ├── season-analysis.js    # Season-level statistical analysis
+│   ├── season-bankroll.js    # Bankroll simulation over a season
+│   ├── polymarket-compare.js # Football Polymarket implied probability comparison
+│   ├── nba-today.js          # Today's NBA odds from ESPN / DraftKings
+│   ├── nba-backtest.js       # NBA strategy backtesting
+│   └── nba-polymarket.js     # NBA Polymarket vs. DraftKings comparison
 ├── package.json
 ├── .gitignore
 └── README.md
+```
+
+---
+
+## Analytics Scripts
+
+All scripts require no API key — they use public endpoints from SofaScore, ESPN, DraftKings, and Polymarket.
+
+### Football
+
+```bash
+# Backtest home-team bias strategy
+npm run backtest:home
+
+# Backtest away-team bias strategy
+npm run backtest:away
+
+# Find the best strategy across all parameters
+npm run backtest:best
+
+# Season-level statistical analysis
+npm run season:analysis
+
+# Bankroll simulation over a season
+npm run season:bankroll
+```
+
+### NBA
+
+```bash
+# Today's NBA games with moneyline, spread, and totals (ESPN / DraftKings)
+npm run nba:today
+
+# Run for a specific date
+DATE=20260325 npm run nba:today
+
+# NBA strategy backtesting
+npm run nba:backtest
+
+# Compare Polymarket NBA market prices vs. DraftKings implied probabilities
+npm run nba:polymarket
 ```
 
 ---
@@ -98,9 +149,9 @@ Add this to your `claude_desktop_config.json` (macOS: `~/Library/Application Sup
 ```json
 {
   "mcpServers": {
-    "sofascore": {
+    "sports-edge": {
       "command": "node",
-      "args": ["/absolute/path/to/sofascore-api/mcp/index.mjs"]
+      "args": ["/absolute/path/to/sports-edge/mcp/index.mjs"]
     }
   }
 }
@@ -109,7 +160,7 @@ Add this to your `claude_desktop_config.json` (macOS: `~/Library/Application Sup
 ### Connecting to Claude Code (CLI)
 
 ```bash
-claude mcp add sofascore node /absolute/path/to/sofascore-api/mcp/index.mjs
+claude mcp add sports-edge node /absolute/path/to/sports-edge/mcp/index.mjs
 ```
 
 ### Connecting to Cursor
@@ -119,9 +170,9 @@ Add to your Cursor MCP config (`~/.cursor/mcp.json`):
 ```json
 {
   "mcpServers": {
-    "sofascore": {
+    "sports-edge": {
       "command": "node",
-      "args": ["/absolute/path/to/sofascore-api/mcp/index.mjs"]
+      "args": ["/absolute/path/to/sports-edge/mcp/index.mjs"]
     }
   }
 }
@@ -159,8 +210,6 @@ Add to your Cursor MCP config (`~/.cursor/mcp.json`):
 | `search` | Search for players, teams, and tournaments by name |
 
 ### Example prompts once connected
-
-Once the MCP server is connected to your AI assistant, you can ask things like:
 
 - *"What football matches are live right now?"*
 - *"Show me the Premier League standings"*
@@ -370,4 +419,6 @@ All errors return JSON:
 | `express` | HTTP server and routing |
 | `axios` | HTTP client for proxying requests |
 | `swagger-ui-express` | Serves the interactive Swagger UI |
+| `@modelcontextprotocol/sdk` | MCP server implementation |
+| `zod` | Schema validation for MCP tools |
 | `nodemon` *(dev)* | Auto-restarts server on file changes |
