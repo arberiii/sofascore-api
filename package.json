@@ -11,7 +11,10 @@
     "backtest:away": "SIDE=away node scripts/backtest-home.js",
     "backtest:best": "node scripts/find-best-strategy.js",
     "season:analysis": "node scripts/season-analysis.js",
-    "season:bankroll": "node scripts/season-bankroll.js"
+    "season:bankroll": "node scripts/season-bankroll.js",
+    "nba:today": "node scripts/nba-today.js",
+    "nba:backtest": "node scripts/nba-backtest.js",
+    "nba:polymarket": "node scripts/nba-polymarket.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.10.1",
